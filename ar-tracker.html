@@ -313,6 +313,16 @@
     <script>
         let arStarted = false;
         let targetFound = false;
+        let debugMode = window.location.search.includes('debug=true');
+
+        // Logging function
+        function log(message, type = 'info') {
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            console.log(`${prefix} ${message}`);
+            if (debugMode) {
+                alert(`${prefix} ${message}`);
+            }
+        }
 
         // Initialize AR
         document.addEventListener('DOMContentLoaded', function() {
@@ -321,6 +331,25 @@
             const loadingScreen = document.getElementById('loading-screen');
             const instructions = document.getElementById('instructions');
             const targetFoundNotif = document.getElementById('target-found');
+            const loadingText = document.getElementById('loading-text');
+
+            log('WebAR aplikace načtena');
+            log(`HTTPS: ${window.location.protocol === 'https:' ? 'Ano' : 'NE - PROBLÉM!'}`);
+            log(`User Agent: ${navigator.userAgent.substring(0, 50)}...`);
+
+            // Check HTTPS
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                loadingText.innerHTML = '❌ CHYBA: Stránka MUSÍ běžet na HTTPS!<br><small>Aktuálně: ' + window.location.protocol + '</small>';
+                log('KRITICKÁ CHYBA: Není HTTPS!', 'error');
+                return;
+            }
+
+            // Check MediaDevices API
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                loadingText.innerHTML = '❌ CHYBA: Váš prohlížeč nepodporuje přístup ke kameře<br><small>Zkuste Chrome nebo Safari</small>';
+                log('MediaDevices API není podporováno', 'error');
+                return;
+            }
 
             // Start AR after small delay
             setTimeout(() => {
@@ -329,17 +358,47 @@
 
             async function startAR() {
                 try {
+                    log('Spouštím AR systém...');
+                    loadingText.textContent = 'Aktivace kamery...';
+
                     await arSystem.start();
                     arStarted = true;
 
                     // Hide loading screen
                     loadingScreen.classList.add('hidden');
 
-                    console.log('AR inicialized successfully');
+                    log('AR úspěšně inicializován!', 'success');
                 } catch (error) {
-                    console.error('Chyba při spouštění AR:', error);
-                    document.getElementById('loading-text').textContent =
-                        'Chyba: Povoľte přístup ke kameře';
+                    log(`Chyba při spouštění AR: ${error.name} - ${error.message}`, 'error');
+                    console.error('Detailní chyba:', error);
+
+                    // User-friendly error messages
+                    let errorMessage = '';
+                    let solution = '';
+
+                    switch(error.name) {
+                        case 'NotAllowedError':
+                            errorMessage = 'Přístup ke kameře byl zamítnut';
+                            solution = 'Povolte přístup ke kameře v nastavení prohlížeče a obnovte stránku';
+                            break;
+                        case 'NotFoundError':
+                            errorMessage = 'Kamera nebyla nalezena';
+                            solution = 'Zkontrolujte, zda má vaše zařízení kameru';
+                            break;
+                        case 'NotReadableError':
+                            errorMessage = 'Kamera je používána jinou aplikací';
+                            solution = 'Zavřete ostatní aplikace používající kameru a obnovte stránku';
+                            break;
+                        case 'SecurityError':
+                            errorMessage = 'Bezpečnostní chyba';
+                            solution = 'Stránka musí běžet na HTTPS protokolu';
+                            break;
+                        default:
+                            errorMessage = 'Neočekávaná chyba: ' + error.message;
+                            solution = 'Zkuste restartovat prohlížeč nebo použít jiný prohlížeč (Chrome/Safari)';
+                    }
+
+                    loadingText.innerHTML = `❌ ${errorMessage}<br><small>${solution}</small><br><br><a href="camera-test.html" style="color: white; text-decoration: underline;">→ Otevřít diagnostiku kamery</a>`;
                 }
             }
 
