@@ -332,7 +332,6 @@
         // Initialize AR
         document.addEventListener('DOMContentLoaded', function() {
             const sceneEl = document.querySelector('a-scene');
-            const arSystem = sceneEl.systems['mindar-image-system'];
             const loadingScreen = document.getElementById('loading-screen');
             const instructions = document.getElementById('instructions');
             const targetFoundNotif = document.getElementById('target-found');
@@ -368,12 +367,27 @@
                 log(`Chyba při načítání videa: ${e.message}`, 'error');
             });
 
-            // Start AR after small delay
-            setTimeout(() => {
-                startAR();
-            }, 1000);
+            // Wait for A-Frame scene to be loaded
+            log('Čekám na načtení A-Frame scény...');
+            sceneEl.addEventListener('loaded', function() {
+                log('A-Frame scéna načtena', 'success');
 
-            async function startAR() {
+                // Now we can access the AR system
+                const arSystem = sceneEl.systems['mindar-image-system'];
+
+                if (!arSystem) {
+                    log('MindAR systém nebyl nalezen!', 'error');
+                    loadingText.innerHTML = '❌ CHYBA: MindAR systém se nenačetl.<br><small>Zkuste obnovit stránku</small>';
+                    return;
+                }
+
+                // Start AR after small delay
+                setTimeout(() => {
+                    startAR(arSystem);
+                }, 1000);
+            });
+
+            async function startAR(arSystem) {
                 try {
                     log('Spouštím AR systém...');
                     loadingText.textContent = 'Aktivace kamery...';
