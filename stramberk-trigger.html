@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Štramberk AR Trigger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .trigger-preview {
+            text-align: center;
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 40px 20px;
+            border-radius: 15px;
+            border: 3px solid #667eea;
+        }
+
+        .trigger-placeholder {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 3/4;
+            margin: 0 auto;
+            background: white;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        .trigger-placeholder .icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .trigger-placeholder p {
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 20px 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .download-btn.secondary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol, .instructions ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .tip-box {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .tip-box h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        .step {
+            background: #fff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .download-btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏰 Štramberk AR Trigger</h1>
+            <p class="subtitle">Trigger obrázek pro Video AR aplikaci</p>
+        </header>
+
+        <div class="card">
+            <h2>📥 Váš trigger: Štramberk</h2>
+            <p>Tento černobílý obrázek Štramberku slouží jako trigger pro AR video aplikaci. Po naskenování se zobrazí video "Štramberk v mlze".</p>
+
+            <div class="trigger-preview">
+                <div class="trigger-placeholder">
+                    <div class="icon">🏰</div>
+                    <p><strong>Černobílý dřevoryt Štramberku</strong></p>
+                    <p>Věž, lampy, stromy a text "ŠTRAMBERK"</p>
+                    <p style="margin-top: 20px; font-size: 0.9rem; color: #999;">
+                        Tento obrázek nahrajte na ethnographic.cz<br>
+                        nebo použijte existující verzi
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ DŮLEŽITÉ: Kompilace triggeru</h3>
+                <p>Aby AR aplikace mohla detekovat váš trigger obrázek, musíte ho zkompilovat do <code>.mind</code> souboru pomocí MindAR compileru.</p>
+            </div>
+
+            <div class="button-group">
+                <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" class="download-btn">
+                    🛠️ Otevřít MindAR Compiler
+                </a>
+                <a href="ar-video.html" class="download-btn secondary">
+                    🎬 Spustit Video AR
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔧 Jak zkompilovat trigger (NUTNÉ!)</h2>
+
+            <div class="step">
+                <h4>Krok 1: Příprava obrázku</h4>
+                <p>Ujistěte se, že máte váš černobílý obrázek Štramberku připravený:</p>
+                <ul>
+                    <li>✅ Formát: PNG nebo JPG</li>
+                    <li>✅ Rozlišení: Minimálně 640x480 px (čím vyšší, tím lepší)</li>
+                    <li>✅ Vysoký kontrast (černá a bílá)</li>
+                    <li>✅ Ostré hrany a detaily</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h4>Krok 2: Otevřete MindAR Compiler</h4>
+                <p>Klikněte na tlačítko "Otevřít MindAR Compiler" výše, nebo jděte na:</p>
+                <p><code>https://hiukim.github.io/mind-ar-js-doc/tools/compile</code></p>
+            </div>
+
+            <div class="step">
+                <h4>Krok 3: Nahrajte obrázek</h4>
+                <ol>
+                    <li>Na stránce compileru klikněte na <strong>"Choose File"</strong></li>
+                    <li>Vyberte váš obrázek Štramberku</li>
+                    <li>Klikněte na <strong>"Start"</strong></li>
+                    <li>Počkejte 10-30 sekund (záleží na velikosti obrázku)</li>
+                </ol>
+            </div>
+
+            <div class="step">
+                <h4>Krok 4: Stáhněte .mind soubor</h4>
+                <ol>
+                    <li>Po dokončení kompilace se zobrazí tlačítko <strong>"Download"</strong></li>
+                    <li>Klikněte a stáhněte soubor <code>targets.mind</code></li>
+                    <li>Přejmenujte ho na <code>stramberk.mind</code></li>
+                </ol>
+            </div>
+
+            <div class="step">
+                <h4>Krok 5: Nahrajte na server</h4>
+                <ol>
+                    <li>Nahrajte <code>stramberk.mind</code> na ethnographic.cz</li>
+                    <li>Doporučená cesta: <code>https://ethnographic.cz/assets/stramberk.mind</code></li>
+                    <li>Nebo do stejné složky jako <code>ar-video.html</code></li>
+                </ol>
+            </div>
+
+            <div class="step">
+                <h4>Krok 6: Aktualizujte ar-video.html</h4>
+                <p>V souboru <code>ar-video.html</code> najděte řádek (~251):</p>
+                <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; ...</code></pre>
+                <p>Změňte na:</p>
+                <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>mindar-image="imageTargetSrc: https://ethnographic.cz/assets/stramberk.mind; ...</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📱 Jak použít AR aplikaci</h2>
+
+            <div class="instructions">
+                <h3>Po kompilaci triggeru:</h3>
+                <ol>
+                    <li><strong>Vytiskněte</strong> váš originální obrázek Štramberku (černobílý dřevoryt)</li>
+                    <li><strong>Doporučená velikost tisku:</strong> A5 nebo A4</li>
+                    <li><strong>Otevřete</strong> na mobilu: <code>https://ethnographic.cz/ar-video.html</code></li>
+                    <li><strong>Povolte</strong> přístup ke kameře</li>
+                    <li><strong>Zamiřte</strong> kameru na vytištěný trigger</li>
+                    <li><strong>Video "Štramberk v mlze"</strong> se začne automaticky přehrávat! 🎬</li>
+                </ol>
+            </div>
+
+            <div class="tip-box">
+                <h3>💡 Tipy pro nejlepší detekci:</h3>
+                <ul>
+                    <li>✅ Vytiskněte trigger na bílý papír</li>
+                    <li>✅ Dobré osvětlení (ne příliš tmavé ani přímé slunce)</li>
+                    <li>✅ Celý trigger musí být viditelný v kameře</li>
+                    <li>✅ Držte telefon stabilně, vzdálenost 20-50 cm</li>
+                    <li>✅ Video se přehrává v loop (opakuje se)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🎬 Upravení videa</h2>
+
+            <div class="instructions">
+                <h3>Pokud chcete použít jiné video:</h3>
+                <ol>
+                    <li>Nahrajte nové video na ethnographic.cz</li>
+                    <li>V <code>ar-video.html</code> najděte řádek (~259):</li>
+                    <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; margin: 10px 0;"><code>&lt;video src="https://ethnographic.cz/S%CC%8Ctramberk%20v%20mlze.mp4"</code></pre>
+                    <li>Změňte URL na vaše nové video</li>
+                    <li>Doporučený formát: MP4 (H.264)</li>
+                    <li>Doporučená velikost: max 20 MB</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔗 Užitečné odkazy</h2>
+            <ul style="line-height: 2;">
+                <li>🛠️ <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" style="color: #667eea;">MindAR Compiler</a></li>
+                <li>📚 <a href="https://hiukim.github.io/mind-ar-js-doc/" target="_blank" style="color: #667eea;">MindAR Dokumentace</a></li>
+                <li>🎬 <a href="ar-video.html" style="color: #667eea;">Spustit Video AR aplikaci</a></li>
+                <li>📷 <a href="camera-test.html" style="color: #667eea;">Test kamery (diagnostika)</a></li>
+                <li>📖 <a href="DEBUG.md" target="_blank" style="color: #667eea;">Troubleshooting průvodce</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

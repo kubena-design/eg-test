@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WebAR Video - Štramberk v mlze</title>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Loading screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            transition: opacity 0.5s;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #loading-text {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* AR UI Overlay */
+        #ar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .instruction-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 80%;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .instruction-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .instruction-box p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .instruction-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Target found notification */
+        .target-found {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .target-found.show {
+            opacity: 1;
+        }
+
+        /* Download trigger button */
+        .download-trigger-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-trigger-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Camera viewport hint */
+        .camera-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .camera-frame::before {
+            content: '📷';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .instruction-box {
+                padding: 20px 25px;
+            }
+
+            .instruction-box h2 {
+                font-size: 1.2rem;
+            }
+
+            .instruction-box p {
+                font-size: 0.95rem;
+            }
+
+            .download-trigger-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <h2>Inicializace WebAR Video...</h2>
+        <p id="loading-text">Načítání videa a aktivace kamery</p>
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene
+        mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
+        color-space="sRGB"
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
+            <!-- Video -->
+            <video
+                id="stramberk-video"
+                src="https://ethnographic.cz/S%CC%8Ctramberk%20v%20mlze.mp4"
+                preload="auto"
+                loop="true"
+                crossorigin="anonymous"
+                webkit-playsinline
+                playsinline>
+            </video>
+        </a-assets>
+
+        <!-- Camera -->
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- AR Target Entity -->
+        <a-entity mindar-image-target="targetIndex: 0">
+            <!-- Video plane -->
+            <a-plane
+                src="#stramberk-video"
+                position="0 0 0"
+                height="0.552"
+                width="1"
+                rotation="0 0 0"
+                class="ar-video">
+            </a-plane>
+        </a-entity>
+    </a-scene>
+
+    <!-- AR UI Overlay -->
+    <div id="ar-overlay">
+        <!-- Status Indicator -->
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Skenování triggeru...</span>
+        </div>
+
+        <!-- Target Found Notification -->
+        <div class="target-found" id="target-found">
+            🎬 Video se přehrává!
+        </div>
+
+        <!-- Instructions -->
+        <div class="instruction-box" id="instructions">
+            <div class="instruction-icon">🎯</div>
+            <h2>Namiřte kameru na Štramberk</h2>
+            <p>Zaměřte kameru na vytištěný trigger obrázek Štramberku. Video se automaticky začne přehrávat.</p>
+        </div>
+
+        <!-- Camera Frame Hint -->
+        <div class="camera-frame"></div>
+
+        <!-- Download Trigger Button -->
+        <button class="download-trigger-btn" onclick="window.location.href='stramberk-trigger.html'">
+            <span>🖼️</span>
+            <span>Zobrazit trigger</span>
+        </button>
+    </div>
+
+    <script>
+        let arStarted = false;
+        let targetFound = false;
+        let debugMode = window.location.search.includes('debug=true');
+        let video = null;
+
+        // Logging function
+        function log(message, type = 'info') {
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            console.log(`${prefix} ${message}`);
+            if (debugMode) {
+                alert(`${prefix} ${message}`);
+            }
+        }
+
+        // Initialize AR
+        document.addEventListener('DOMContentLoaded', function() {
+            const sceneEl = document.querySelector('a-scene');
+            const arSystem = sceneEl.systems['mindar-image-system'];
+            const loadingScreen = document.getElementById('loading-screen');
+            const instructions = document.getElementById('instructions');
+            const targetFoundNotif = document.getElementById('target-found');
+            const loadingText = document.getElementById('loading-text');
+
+            video = document.getElementById('stramberk-video');
+
+            log('WebAR Video aplikace načtena');
+            log(`HTTPS: ${window.location.protocol === 'https:' ? 'Ano' : 'NE - PROBLÉM!'}`);
+            log(`User Agent: ${navigator.userAgent.substring(0, 50)}...`);
+
+            // Check HTTPS
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                loadingText.innerHTML = '❌ CHYBA: Stránka MUSÍ běžet na HTTPS!<br><small>Aktuálně: ' + window.location.protocol + '</small>';
+                log('KRITICKÁ CHYBA: Není HTTPS!', 'error');
+                return;
+            }
+
+            // Check MediaDevices API
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                loadingText.innerHTML = '❌ CHYBA: Váš prohlížeč nepodporuje přístup ke kameře<br><small>Zkuste Chrome nebo Safari</small>';
+                log('MediaDevices API není podporováno', 'error');
+                return;
+            }
+
+            // Pre-load video
+            log('Načítám video...');
+            video.addEventListener('loadeddata', () => {
+                log('Video načteno', 'success');
+            });
+
+            video.addEventListener('error', (e) => {
+                log(`Chyba při načítání videa: ${e.message}`, 'error');
+            });
+
+            // Start AR after small delay
+            setTimeout(() => {
+                startAR();
+            }, 1000);
+
+            async function startAR() {
+                try {
+                    log('Spouštím AR systém...');
+                    loadingText.textContent = 'Aktivace kamery...';
+
+                    await arSystem.start();
+                    arStarted = true;
+
+                    // Hide loading screen
+                    loadingScreen.classList.add('hidden');
+
+                    log('AR úspěšně inicializován!', 'success');
+                } catch (error) {
+                    log(`Chyba při spouštění AR: ${error.name} - ${error.message}`, 'error');
+                    console.error('Detailní chyba:', error);
+
+                    // User-friendly error messages
+                    let errorMessage = '';
+                    let solution = '';
+
+                    switch(error.name) {
+                        case 'NotAllowedError':
+                            errorMessage = 'Přístup ke kameře byl zamítnut';
+                            solution = 'Povolte přístup ke kameře v nastavení prohlížeče a obnovte stránku';
+                            break;
+                        case 'NotFoundError':
+                            errorMessage = 'Kamera nebyla nalezena';
+                            solution = 'Zkontrolujte, zda má vaše zařízení kameru';
+                            break;
+                        case 'NotReadableError':
+                            errorMessage = 'Kamera je používána jinou aplikací';
+                            solution = 'Zavřete ostatní aplikace používající kameru a obnovte stránku';
+                            break;
+                        case 'SecurityError':
+                            errorMessage = 'Bezpečnostní chyba';
+                            solution = 'Stránka musí běžet na HTTPS protokolu';
+                            break;
+                        default:
+                            errorMessage = 'Neočekávaná chyba: ' + error.message;
+                            solution = 'Zkuste restartovat prohlížeč nebo použít jiný prohlížeč (Chrome/Safari)';
+                    }
+
+                    loadingText.innerHTML = `❌ ${errorMessage}<br><small>${solution}</small><br><br><a href="camera-test.html" style="color: white; text-decoration: underline;">→ Otevřít diagnostiku kamery</a>`;
+                }
+            }
+
+            // Listen for target found
+            const arTarget = document.querySelector('[mindar-image-target]');
+
+            arTarget.addEventListener('targetFound', event => {
+                log('Target nalezen! Spouštím video...', 'success');
+                targetFound = true;
+
+                // Play video
+                video.play().catch(err => {
+                    log(`Chyba při přehrávání videa: ${err.message}`, 'error');
+                });
+
+                // Show notification
+                targetFoundNotif.classList.add('show');
+
+                // Hide instructions
+                instructions.style.opacity = '0';
+
+                // Update status
+                document.querySelector('.status-indicator span').textContent = 'Video se přehrává 🎬';
+                document.querySelector('.status-dot').style.background = '#4CAF50';
+
+                // Hide notification after 2 seconds
+                setTimeout(() => {
+                    targetFoundNotif.classList.remove('show');
+                }, 2000);
+            });
+
+            arTarget.addEventListener('targetLost', event => {
+                log('Target ztracen, pauzuji video');
+                targetFound = false;
+
+                // Pause video
+                video.pause();
+
+                // Show instructions again
+                instructions.style.opacity = '1';
+
+                // Update status
+                document.querySelector('.status-indicator span').textContent = 'Skenování triggeru...';
+                document.querySelector('.status-dot').style.background = '#FFC107';
+            });
+
+            // Handle window close
+            window.addEventListener('beforeunload', () => {
+                if (arStarted) {
+                    arSystem.stop();
+                }
+                if (video) {
+                    video.pause();
+                }
+            });
+        });
+
+        // Prevent scrolling on mobile
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
