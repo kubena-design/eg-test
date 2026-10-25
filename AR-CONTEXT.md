@@ -68,8 +68,8 @@ Stav podle posledního testu na iPhonu (Safari): **kamera se spouští, ale trig
 
 ### Pravděpodobné problémy, které se ukážou až po zprovoznění triggeru
 
-2. **Video na iOS se nemusí spustit.** Element `<video>` nemá atribut `muted`. iOS Safari blokuje `play()` se zvukem, pokud nepřijde přímo z dotyku uživatele (`targetFound` dotyk není). Řešení: přidat `muted`, případně přidat tlačítko „Zapnout zvuk“ nebo úvodní obrazovku „Klepněte pro start“, která video odemkne.
-3. **Nesedí poměr stran.** `<a-plane>` má `width="1" height="0.552"` (video na šířku), ale trigger je na výšku (~3:4). MindAR měří šířku triggeru jako 1, takže na výšku by plocha měla mít cca `height="1.333"`, aby video zakrylo celý obrázek. Ideální je video exportovat ve stejném poměru stran a se stejným ořezem jako trigger – pak efekt „ožití obrázku“ funguje nejlíp.
+2. ~~Video na iOS se nemusí spustit~~ – **opraveno:** `<video>` má `muted` (atribut i `video.muted = true` v JS). Video je proto bez zvuku. Pokud bude zvuk potřeba, je nutné přidat tlačítko „Zapnout zvuk“ (iOS povolí zvuk jen po dotyku uživatele).
+3. ~~Nesedí poměr stran~~ – **opraveno:** `<a-plane id="video-plane">` má výchozí výšku `1.333` (trigger 3:4, MindAR bere šířku triggeru jako 1) a po načtení metadat videa se výška nastaví na `videoHeight / videoWidth`, takže video není deformované. Video zakryje celý trigger jen tehdy, když má stejný poměr stran (3:4) – ideálně ho exportovat se stejným ořezem jako trigger.
 4. **Velikost videa.** Neověřeno. Pro mobil doporučeno MP4 (H.264), do ~20 MB.
 
 ### Ve starších demech (netýká se hlavní aplikace)
@@ -80,11 +80,10 @@ Stav podle posledního testu na iPhonu (Safari): **kamera se spouští, ale trig
 ## Další kroky (podle priority)
 
 1. Zkompilovat trigger → `stramberk.mind` → nahrát na ethnographic.cz → upravit `imageTargetSrc` v `ar-video.html`.
-2. Přidat `muted` na `<video>` (a volitelně tlačítko pro zvuk).
-3. Srovnat poměr stran `<a-plane>` s triggerem, případně upravit video.
-4. Nahrát obrázek triggeru na web (např. `stramberk-trigger.png`) a zobrazit ho ve `stramberk-trigger.html` místo zástupného bloku.
-5. Otestovat na iPhonu (Safari) a Androidu (Chrome) s vytištěným triggerem (A5/A4, matný papír).
-6. Volitelně: opravit nebo odstranit staré demo `ar-tracker.html`, přegenerovat archivy.
+2. Ověřit, že video má poměr stran 3:4 jako trigger (pokud ne, upravit export videa). Volitelně tlačítko pro zvuk.
+3. Nahrát obrázek triggeru na web (např. `stramberk-trigger.png`) a zobrazit ho ve `stramberk-trigger.html` místo zástupného bloku.
+4. Otestovat na iPhonu (Safari) a Androidu (Chrome) s vytištěným triggerem (A5/A4, matný papír).
+5. Volitelně: opravit nebo odstranit staré demo `ar-tracker.html`, přegenerovat archivy.
 
 ## Testování
 

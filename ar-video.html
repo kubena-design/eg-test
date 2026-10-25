@@ -262,6 +262,7 @@
                 preload="auto"
                 loop="true"
                 crossorigin="anonymous"
+                muted
                 webkit-playsinline
                 playsinline>
             </video>
@@ -272,11 +273,12 @@
 
         <!-- AR Target Entity -->
         <a-entity mindar-image-target="targetIndex: 0">
-            <!-- Video plane -->
+            <!-- MindAR sets the trigger width to 1; height 1.333 matches the 3:4 Štramberk trigger until the video's real ratio is known -->
             <a-plane
+                id="video-plane"
                 src="#stramberk-video"
                 position="0 0 0"
-                height="0.552"
+                height="1.333"
                 width="1"
                 rotation="0 0 0"
                 class="ar-video">
@@ -338,6 +340,18 @@
             const loadingText = document.getElementById('loading-text');
 
             video = document.getElementById('stramberk-video');
+            // iOS Safari only allows play() without a user tap when the muted property is set
+            video.muted = true;
+
+            const videoPlane = document.getElementById('video-plane');
+            const fitPlaneToVideo = () => {
+                if (video.videoWidth && video.videoHeight) {
+                    videoPlane.setAttribute('height', video.videoHeight / video.videoWidth);
+                    log(`Video ${video.videoWidth}x${video.videoHeight}, výška plochy ${(video.videoHeight / video.videoWidth).toFixed(3)}`);
+                }
+            };
+            video.addEventListener('loadedmetadata', fitPlaneToVideo);
+            fitPlaneToVideo();
 
             log('WebAR Video aplikace načtena');
             log(`HTTPS: ${window.location.protocol === 'https:' ? 'Ano' : 'NE - PROBLÉM!'}`);
