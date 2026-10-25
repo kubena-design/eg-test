@@ -1,0 +1,38 @@
+name: Deploy na ethnographic.cz
+
+# Po každém pushi do vývojové větve nahraje web přes FTP na hosting.
+# Ručně jde spustit v záložce Actions → "Deploy na ethnographic.cz" → Run workflow.
+on:
+  push:
+    branches:
+      - claude/webar-landing-page-UsD5U
+  workflow_dispatch:
+
+concurrency:
+  group: ftp-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stáhnout kód
+        uses: actions/checkout@v4
+
+      - name: Nahrát přes FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # ftps = šifrované (doporučeno); pokud hosting neumí, nastav proměnnou FTP_PROTOCOL na "ftp"
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          # Cílová složka na serveru (musí končit lomítkem)
+          server-dir: ${{ vars.FTP_DIR || 'ar-test/' }}
+          # Nahrávají se jen změněné soubory; dokumentace a archivy zůstávají jen v repozitáři
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/*.md
+            *.zip
+            *.tar.gz
