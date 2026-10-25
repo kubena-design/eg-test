@@ -192,6 +192,11 @@
             transform: scale(0.95);
         }
 
+        .download-trigger-btn.sound-btn {
+            right: auto;
+            left: 30px;
+        }
+
         /* Camera viewport hint */
         .camera-frame {
             position: absolute;
@@ -234,6 +239,10 @@
                 right: 20px;
                 padding: 12px 20px;
                 font-size: 0.9rem;
+            }
+
+            .download-trigger-btn.sound-btn {
+                left: 20px;
             }
         }
     </style>
@@ -309,6 +318,11 @@
         <!-- Camera Frame Hint -->
         <div class="camera-frame"></div>
 
+        <button class="download-trigger-btn sound-btn" id="sound-btn" type="button" aria-pressed="false">
+            <span id="sound-icon">🔇</span>
+            <span id="sound-label">Zapnout zvuk</span>
+        </button>
+
         <!-- Download Trigger Button -->
         <button class="download-trigger-btn" onclick="window.location.href='stramberk-trigger.html'">
             <span>🖼️</span>
@@ -352,6 +366,19 @@
             };
             video.addEventListener('loadedmetadata', fitPlaneToVideo);
             fitPlaneToVideo();
+
+            // Unmuting must happen inside the tap handler, otherwise iOS keeps the video silent
+            const soundBtn = document.getElementById('sound-btn');
+            soundBtn.addEventListener('click', () => {
+                video.muted = !video.muted;
+                // play() during the tap unlocks sound for later play() calls from targetFound
+                video.play()
+                    .then(() => { if (!targetFound) video.pause(); })
+                    .catch(err => log(`Chyba při přehrávání videa: ${err.message}`, 'error'));
+                document.getElementById('sound-icon').textContent = video.muted ? '🔇' : '🔊';
+                document.getElementById('sound-label').textContent = video.muted ? 'Zapnout zvuk' : 'Vypnout zvuk';
+                soundBtn.setAttribute('aria-pressed', String(!video.muted));
+            });
 
             log('WebAR Video aplikace načtena');
             log(`HTTPS: ${window.location.protocol === 'https:' ? 'Ano' : 'NE - PROBLÉM!'}`);
